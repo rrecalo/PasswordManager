@@ -8,6 +8,8 @@
 #include <wx/wx.h>
 #include <iostream>
 #include <fstream>
+#include <bcrypt/BCrypt.hpp>
+#include "EncryptionManager.cpp"
 
 class PasswordManager {
     
@@ -20,6 +22,7 @@ public:
         new_file.open("master.dat", ios::out);
         if(!new_file){
             cout<< "File creation Failed";
+            new_file.close();
             return false;
         }
         else{
@@ -34,16 +37,47 @@ public:
     static bool masterPasswordExists(){
         
         using namespace std;
-        
-        if(fstream("master.dat"))
+        fstream is;
+        is.open("master.dat", ios::in);
+        if(is)
         {
-            cout << "master.dat exists!" << endl;
+            //cout << "master.dat exists!" << endl;
             return true;
         }
+        is.close();
         return false;
     };
     
-    static void makeMasterPassword(wxString password){
+    static bool compareMasterPassword(wxString password)
+    {
+        using namespace std;
         
-    }
+        ifstream infile;
+
+        string read_file_name("master.dat");
+
+        infile.open(read_file_name);
+
+        string sLine;
+
+        while (!infile.eof())
+        {
+            infile >> sLine;
+            cout << sLine.data() << endl;
+
+        }
+
+        infile.close();
+        
+        //sLine is read in from master.dat in its encrypted form!!!
+        cout << "existing password :: " << sLine << endl;
+        //password entered is already encrypted!!!23
+        cout << "password entered :: " << (string)password << endl;
+        
+        
+        //cout << "existing password :: " << EncryptionManager::decrypt(sLine, "mykey") << endl;
+        //is.close();
+        return (((std::string)password) == sLine);
+        //BCrypt::validatePassword("password", (std::string)password);
+    };
 };
