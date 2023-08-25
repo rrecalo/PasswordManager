@@ -16,16 +16,16 @@ class EncryptionManager {
 public:
     EncryptionManager(){};
     
-    static wxString encryptPassword(wxString password)
+    static std::string encryptPassword(wxString password)
     {
         using namespace std;
+
         
-        //(string)password;
         std::string encryptedPass = encrypt((string)password, "mykey");
         //std::cout << "Encrypted: " << encryptedPass;
         //std::cout << "\nDecrypted: " << decrypt(encryptedPass, "mykey");
         
-        return wxString(encryptedPass);
+        return std::string(encryptedPass);
     }
     static std::string encrypt(std::string msg, std::string key)
     {

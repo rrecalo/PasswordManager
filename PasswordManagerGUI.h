@@ -16,11 +16,16 @@ public:
     MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size);
 private:
     
-    void onSubmitMasterPass(wxCommandEvent&);
+    void onSubmitMasterPin(wxCommandEvent&);
     void onDebugButtonClicked(wxCommandEvent&);
     void signIn();
-    bool validatePinInput();
-    bool createdMasterPassword = false;
+    bool validatePinInput(std::string input);
+    void createMasterPin(std::string input);
+    void attemptSignIn(std::string input);
+    void displayIncorrectPassword();
+    void displayNewPinCreated();
+    void displayInvalidInput();
+    bool masterPinExists;
     bool signedIn = false;
     
     wxTextCtrl* masterPassEntryBox;

@@ -34,6 +34,9 @@ bool MyApp::OnInit()
     //frame->SetWindowStyle(wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX));
     frame->Refresh();
     frame->Show(true);
+    
+
+    
     return true;
 }
 
@@ -90,67 +93,95 @@ MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size) 
 }
 
 
-void MyFrame::onSubmitMasterPass(wxCommandEvent &commandEvent)
+void MyFrame::onSubmitMasterPin(wxCommandEvent &commandEvent)
 {
-    
-    auto encryptedPassword = EncryptionManager::encryptPassword(masterPassEntryBox->GetValue());
-    
     using namespace std;
-    //remove("master.dat");
-    //return;
-    //if master password exists, compare the hash
-    if(validatePinInput()){
+    
+    //get the password input from the text control box
+    string passwordInput = (string)masterPassEntryBox->GetValue();
+    
+    //first check input validity
+    if(validatePinInput(passwordInput)){
+        
+        //if the input is valid, and the master pin already exists, try to sign in
         if(PasswordManager::masterPasswordExists()){
-            //if the master password matches, continue flow
-            if(PasswordManager::compareMasterPassword(encryptedPassword))
-            {
-                cout << "Password Match!";
-                signIn();
-            }
-            else
-            {
-                cout << "password does not match!";
-            }
+            cout << "attempted sign in!";
+            attemptSignIn(passwordInput);
         }
-        //if no master password exists
+        
+        //if the input is valid but the master pin does NOT exist, try to create a new master pin;
         else{
-            
-            //store the master password that was input;
-            bool success = PasswordManager::storeMasterPassword(encryptedPassword);
-            if(success){
-                //cout << "new password stored!!!" << endl;
-                cout << "new password: " << encryptedPassword << endl;
-                submitButton->SetLabel(wxString("Sign In"));
-                signInPrompt->SetLabel("Re-enter your 4-digit master pin to sign in.");
-                sizer->Layout();
-            }
-            else{
-                cout << "error storing the new password!!!";
-            }
+            createMasterPin(passwordInput);
         }
     }
+    //if the input is invalid, update the GUI to inform the user...
     else{
-        masterPassEntryBox->SetHint("Please enter only digits 0-9, no spaces or special characters.");
-        submitButton->SetLabel(wxString("Try Again"));
+        displayInvalidInput();
     }
-
     
+    //always clear the input box, so the user knows that the button click did *something*
     masterPassEntryBox->Clear();
-    
 }
 
-bool MyFrame::validatePinInput(){
+void MyFrame::attemptSignIn(std::string input){
+    
+    std::string encryptedPassword = EncryptionManager::encryptPassword(input);
+    if(PasswordManager::compareMasterPassword(encryptedPassword)){
+        std::cout << "password match";
+        signIn();
+    }
+    else{
+        displayIncorrectPassword();
+    }
+}
+
+
+void MyFrame::createMasterPin(std::string input){
+    
+    std::string encryptedPassword = EncryptionManager::encryptPassword(input);
+    bool success = PasswordManager::storeMasterPassword(encryptedPassword);
+    if(success){
+        std::cout << "Created new master pin!";
+        displayNewPinCreated();
+    }
+    else
+        std::cout << "Error creating new master pin!";
+}
+
+void MyFrame::displayIncorrectPassword(){
+    masterPassEntryBox->SetHint("Incorrect pin, try again");
+    submitButton->SetLabel(wxString("Sign In"));
+    signInPrompt->SetLabel(wxString("Please enter your master pin to sign in..."));
+    sizer->Layout();
+        
+}
+
+void MyFrame::displayInvalidInput(){
+    masterPassEntryBox->SetHint("Please enter only digits 0-9, no spaces or special characters.");
+    submitButton->SetLabel(wxString("Try Again"));
+    if(PasswordManager::masterPasswordExists())
+    {
+        signInPrompt->SetLabel(wxString("Please enter your master pin to sign in..."));
+        sizer->Layout();
+    }
+}
+void MyFrame::displayNewPinCreated(){
+    signInPrompt->SetLabel(wxString("Master pin successfully created! Re-enter it to sign in."));
+    submitButton->SetLabel(wxString("Sign In"));
+    sizer->Layout();
+}
+
+bool MyFrame::validatePinInput(std::string input){
     using namespace std;
-    string input = (string)masterPassEntryBox->GetValue();
     
     regex integer_expr("[[:digit:]][[:digit:]][[:digit:]][[:digit:]]");
     
     if(regex_match(input, integer_expr)){
-        cout << "INPUT OK";
+        //cout << "INPUT OK";
         return 1;
     }
     if(input.find(" ")){
-        cout << "SPACE FOUND !!";
+        //cout << "SPACE FOUND!!";
         return 0;
     }
     else return 0;
@@ -161,6 +192,8 @@ void MyFrame::signIn(){
     submitButton->Show(false);
     masterPassEntryBox->Show(false);
     sizer->Layout();
+    
+    signedIn = true;
     
 };
 

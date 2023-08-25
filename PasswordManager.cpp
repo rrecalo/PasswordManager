@@ -21,12 +21,12 @@ public:
         fstream new_file;
         new_file.open("master.dat", ios::out);
         if(!new_file){
-            cout<< "File creation Failed";
+            cout << "File creation Failed";
             new_file.close();
             return false;
         }
         else{
-            new_file<<encryptedPassword;
+            new_file << encryptedPassword;
             //cout<< "New File created";
             new_file.close();
             return true;
@@ -48,7 +48,7 @@ public:
         return false;
     };
     
-    static bool compareMasterPassword(wxString password)
+    static bool compareMasterPassword(std::string password)
     {
         using namespace std;
         
@@ -70,14 +70,14 @@ public:
         infile.close();
         
         //sLine is read in from master.dat in its encrypted form!!!
-        cout << "existing password :: " << sLine << endl;
+        //cout << "existing password :: " << sLine << endl;
         //password entered is already encrypted!!!23
-        cout << "password entered :: " << (string)password << endl;
+        //cout << "password entered :: " << password << endl;
         
         
         //cout << "existing password :: " << EncryptionManager::decrypt(sLine, "mykey") << endl;
         //is.close();
-        return (((std::string)password) == sLine);
+        return (password == sLine);
         //BCrypt::validatePassword("password", (std::string)password);
     };
 };
