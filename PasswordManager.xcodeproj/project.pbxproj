@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		ACF76D382A97D5BA002CA04B /* PasswordManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ACF76D372A97D5BA002CA04B /* PasswordManager.cpp */; };
+		ACF76D382A97D5BA002CA04B /* PasswordManagerGUI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ACF76D372A97D5BA002CA04B /* PasswordManagerGUI.cpp */; };
+		ACF76D3B2A97FDF4002CA04B /* EncryptionManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ACF76D3A2A97FDF4002CA04B /* EncryptionManager.cpp */; };
+		ACF76D3E2A97FE67002CA04B /* StorageManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ACF76D3C2A97FE67002CA04B /* StorageManager.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -27,11 +29,26 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		ACF76D422A9816B4002CA04B /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		ACF76D092A97D505002CA04B /* PasswordManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PasswordManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ACF76D1A2A97D507002CA04B /* PasswordManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PasswordManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		ACF76D242A97D507002CA04B /* PasswordManagerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PasswordManagerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		ACF76D372A97D5BA002CA04B /* PasswordManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PasswordManager.cpp; sourceTree = "<group>"; };
+		ACF76D372A97D5BA002CA04B /* PasswordManagerGUI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PasswordManagerGUI.cpp; sourceTree = "<group>"; };
+		ACF76D392A97FD6D002CA04B /* PasswordManagerGUI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PasswordManagerGUI.h; sourceTree = "<group>"; };
+		ACF76D3A2A97FDF4002CA04B /* EncryptionManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = EncryptionManager.cpp; sourceTree = "<group>"; };
+		ACF76D3C2A97FE67002CA04B /* StorageManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StorageManager.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,7 +79,10 @@
 		ACF76D002A97D505002CA04B = {
 			isa = PBXGroup;
 			children = (
-				ACF76D372A97D5BA002CA04B /* PasswordManager.cpp */,
+				ACF76D3C2A97FE67002CA04B /* StorageManager.cpp */,
+				ACF76D3A2A97FDF4002CA04B /* EncryptionManager.cpp */,
+				ACF76D392A97FD6D002CA04B /* PasswordManagerGUI.h */,
+				ACF76D372A97D5BA002CA04B /* PasswordManagerGUI.cpp */,
 				ACF76D0A2A97D505002CA04B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -87,6 +107,7 @@
 				ACF76D052A97D505002CA04B /* Sources */,
 				ACF76D062A97D505002CA04B /* Frameworks */,
 				ACF76D072A97D505002CA04B /* Resources */,
+				ACF76D422A9816B4002CA04B /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -205,7 +226,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				ACF76D382A97D5BA002CA04B /* PasswordManager.cpp in Sources */,
+				ACF76D3B2A97FDF4002CA04B /* EncryptionManager.cpp in Sources */,
+				ACF76D3E2A97FE67002CA04B /* StorageManager.cpp in Sources */,
+				ACF76D382A97D5BA002CA04B /* PasswordManagerGUI.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
