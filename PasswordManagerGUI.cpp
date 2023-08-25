@@ -42,14 +42,14 @@ MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size) 
     
 //    wxPanel *panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(300, 200));
 //    panel->SetBackgroundColour(wxColor(100, 100, 200));
-
+    
     wxStaticText *text = new wxStaticText(this, -1, "Welcome to Password Manager!", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE);
     //wxFont font = text->GetFont();
     //font.SetPointSize( 24 );
     //text->SetFont(font);
     text->SetFont(text->GetFont().Scale(1.5));
     
-    wxStaticText *text2 = new wxStaticText(this, 1, "It looks like you don't have a master password, please enter one below.", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE);
+    wxStaticText *makeMasterPrompt = new wxStaticText(this, 1, "It looks like you don't have a master password, please enter one below.", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE);
     
     masterPassEntryBox = new wxTextCtrl(this, 1, "");
     masterPassEntryBox->SetMinSize(wxSize(300, 25));
@@ -62,9 +62,18 @@ MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size) 
     sizer->SetMinSize(500, 300);
 
     sizer->Add(text, 0, wxALIGN_CENTER | wxTOP | wxBOTTOM, 10);
-    sizer->Add(text2, 0, wxALIGN_CENTER | wxTOP | wxBOTTOM, 10);
+    sizer->Add(makeMasterPrompt, 0, wxALIGN_CENTER | wxTOP | wxBOTTOM, 10);
     sizer->Add(masterPassEntryBox, 0.5, wxALIGN_CENTER | wxHORIZONTAL | wxBOTTOM, 10);
     sizer->Add(submitButton, 0, wxALIGN_CENTER | wxBOTTOM, 25);
+    
+    if(PasswordManager::masterPasswordExists())
+    {
+        
+        makeMasterPrompt->Show(false);
+        masterPassEntryBox->Show(false);
+        //submitButton->Show(false);
+        
+    }
     //sizer->Add(panel, 1, wxALIGN_CENTER | wxLEFT | wxRIGHT | wxTOP | wxBOTTOM, 50);
     this->SetSizerAndFit(sizer);
 
@@ -81,67 +90,22 @@ void MyFrame::onSubmitMasterPass(wxCommandEvent &commandEvent)
     //encrypt
     auto encryptedPassword = EncryptionManager::encryptPassword(masterPassEntryBox->GetValue());
     
-    //store
-    //StorageManager::storePassword(encryptedPassword);
     using namespace std;
-//
-//    ofstream outstream("master.dat", ios::out);
-//    if(!outstream)
-//    {
-//        cout << "Can't open file!" << endl;
-//    }
-//    outstream << encryptedPassword;
-//    outstream.close();
-//    if(!outstream.good())
-//    {
-//        cout << "Error writing!" << endl;
-//    }
-//
-    //remove("master.dat");
     
-    if(!ifstream("master.dat")){
-        cout << "file does not exist!";
-        ofstream outstream("master.dat", ios::out);
-            if(!outstream)
-            {
-                cout << "Can't make file!" << endl;
-            }
-            else
-            {
-                cout << "File created!";
-                outstream << encryptedPassword;
-                outstream.close();
-                if(!outstream.good())
-                {
-                    cout << "Error writing!" << endl;
-                }
-            }
+    if(PasswordManager::masterPasswordExists()){
+        
     }
     else{
-        cout << "File already exists, move to read!" << endl;
+        bool success = PasswordManager::storeMasterPassword(encryptedPassword);
+        if(success){
+            cout << "new password stored!!!";
+        }
+        else{
+            cout << "error storing the new password!!!";
+        }
     }
     
-    ifstream instream("master.dat", ios::in);
-    if(!instream)
-    {
-        cout << "Can't open file!" << endl;
-    }
-    string a;
-    getline(instream, a);
-    cout << a;
     
-    
-    
-    
-    //instream.getline(string& s, char delim );
-    
-    
-    
-    
-
-    //cleanup
-    
-    //std::cout << encryptedPassword;
     masterPassEntryBox->Clear();
     
 }
