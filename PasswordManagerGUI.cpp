@@ -8,7 +8,7 @@
 #include <wx/splitter.h>
 #include "PasswordManagerGUI.h"
 #include "EncryptionManager.cpp"
-#include "StorageManager.cpp"
+#include "PasswordManager.cpp"
 #include <fstream>
 #include <iostream>
 #include <cstdio>
