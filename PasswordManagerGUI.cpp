@@ -20,6 +20,7 @@ class MyApp : public wxApp
     
 public :
     virtual bool OnInit();
+    MyFrame *frame;
 };
 
 wxIMPLEMENT_APP(MyApp);
@@ -30,28 +31,21 @@ wxIMPLEMENT_APP(MyApp);
 
 bool MyApp::OnInit()
 {
-    MyFrame *frame = new MyFrame("Password Manager", wxDefaultPosition, wxDefaultSize);
-    //frame->SetWindowStyle(wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX));
+    frame = new MyFrame("Password Manager", wxDefaultPosition, wxDefaultSize);
+    frame->initLoginScreen();
     frame->Refresh();
     frame->Show(true);
-    
 
-    
     return true;
 }
 
+
 MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size) :
     wxFrame(nullptr, wxID_ANY, title, pos, size, wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX))
-{
-    
-    
-//    wxPanel *panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(300, 200));
-//    panel->SetBackgroundColour(wxColor(100, 100, 200));
-    
+{}
+
+void MyFrame::initLoginScreen(){
     wxStaticText *text = new wxStaticText(this, -1, "Welcome to Password Manager!", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE);
-    //wxFont font = text->GetFont();
-    //font.SetPointSize( 24 );
-    //text->SetFont(font);
     text->SetFont(text->GetFont().Scale(1.5));
     
     signInPrompt = new wxStaticText(this, 1, "Please create a 4-digit master pin", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE);
@@ -78,18 +72,10 @@ MyFrame::MyFrame(const wxString &title, const wxPoint &pos, const wxSize &size) 
     if(PasswordManager::masterPasswordExists())
     {
         signInPrompt->SetLabel(wxString("Please enter your master pin to sign in..."));
-        
-        //signInPrompt->Show(false);
-        //masterPassEntryBox->Show(false);
         submitButton->SetLabel(wxString("Sign In"));
         
     }
-    //sizer->Add(panel, 1, wxALIGN_CENTER | wxLEFT | wxRIGHT | wxTOP | wxBOTTOM, 50);
     this->SetSizerAndFit(sizer);
-
-    
-    
-    
 }
 
 
@@ -120,7 +106,10 @@ void MyFrame::onSubmitMasterPin(wxCommandEvent &commandEvent)
     }
     
     //always clear the input box, so the user knows that the button click did *something*
-    masterPassEntryBox->Clear();
+    if(masterPassEntryBox){
+        //cout<< "box detected";
+        masterPassEntryBox->Clear();
+    }
 }
 
 void MyFrame::attemptSignIn(std::string input){
@@ -194,6 +183,13 @@ void MyFrame::signIn(){
     sizer->Layout();
     
     signedIn = true;
+    
+    passwordList = new PasswordListWindow("Password List window", wxDefaultPosition, wxDefaultSize);
+    passwordList->init();
+    passwordList->Reparent(this->GetParent());
+    passwordList->Show(true);
+    this->Show(false);
+    
     
 };
 
