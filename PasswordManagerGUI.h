@@ -36,7 +36,7 @@ private:
 };
 
 wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
-EVT_BUTTON(2, MyFrame::onSubmitMasterPass)
+EVT_BUTTON(2, MyFrame::onSubmitMasterPin)
 EVT_BUTTON(3, MyFrame::onDebugButtonClicked)
 wxEND_EVENT_TABLE()
 

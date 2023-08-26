@@ -105,7 +105,7 @@ void MyFrame::onSubmitMasterPin(wxCommandEvent &commandEvent)
         
         //if the input is valid, and the master pin already exists, try to sign in
         if(PasswordManager::masterPasswordExists()){
-            cout << "attempted sign in!";
+            //cout << "attempted sign in!";
             attemptSignIn(passwordInput);
         }
         
@@ -127,7 +127,7 @@ void MyFrame::attemptSignIn(std::string input){
     
     std::string encryptedPassword = EncryptionManager::encryptPassword(input);
     if(PasswordManager::compareMasterPassword(encryptedPassword)){
-        std::cout << "password match";
+        //std::cout << "password match";
         signIn();
     }
     else{
@@ -141,7 +141,7 @@ void MyFrame::createMasterPin(std::string input){
     std::string encryptedPassword = EncryptionManager::encryptPassword(input);
     bool success = PasswordManager::storeMasterPassword(encryptedPassword);
     if(success){
-        std::cout << "Created new master pin!";
+        //std::cout << "Created new master pin!";
         displayNewPinCreated();
     }
     else
