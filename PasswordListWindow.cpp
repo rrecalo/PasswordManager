@@ -22,7 +22,6 @@ wxBEGIN_EVENT_TABLE(PasswordListWindow, wxFrame)
     EVT_BUTTON(56, PasswordListWindow::onSubmitNewAccount)
 wxEND_EVENT_TABLE()
 
-
 PasswordListWindow::PasswordListWindow(const wxString &title, const wxPoint &pos, const wxSize &size) :
     wxFrame(nullptr, wxID_ANY, title, pos, size, wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX))
 {};
@@ -116,23 +115,24 @@ void PasswordListWindow::onSubmitNewAccount(wxCommandEvent &commandEvent){
     //std::cout << "login field : " << !loginField.empty() << "\n\n";
     
     if(!loginField.empty() && !passwordField.empty()){
-        char const *s = passwordField.c_str();
-        unsigned char *x;
-        unsigned i;
-        unsigned int l = gcry_md_get_algo_dlen(GCRY_MD_SHA256); /* get digest length (used later to print the result) */
-        gcry_md_hd_t h;
-        gcry_md_open(&h, GCRY_MD_SHA256, GCRY_MD_FLAG_SECURE); /* initialise the hash context */
-        gcry_md_write(h, s, strlen(s)); /* hash some text */
-        x = gcry_md_read(h, GCRY_MD_SHA256); /* get the result */
-        
-        std::string hashedPass;
-        for (size_t i = 0; i < l; ++i) {
-            hashedPass += char("0123456789ABCDEF"[x[i] >> 4]);
-            hashedPass += char("0123456789ABCDEF"[x[i] & 0x0F]);
-        }
+//        char const *s = passwordField.c_str();
+//        unsigned char *x;
+//        unsigned i;
+//        unsigned int l = gcry_md_get_algo_dlen(GCRY_MD_SHA256); /* get digest length (used later to print the result) */
+//        gcry_md_hd_t h;
+//        gcry_md_open(&h, GCRY_MD_SHA256, GCRY_MD_FLAG_SECURE); /* initialise the hash context */
+//        gcry_md_write(h, s, strlen(s)); /* hash some text */
+//        x = gcry_md_read(h, GCRY_MD_SHA256); /* get the result */
+//
+//        std::string hashedPass;
+//        for (size_t i = 0; i < l; ++i) {
+//            hashedPass += char("0123456789ABCDEF"[x[i] >> 4]);
+//            hashedPass += char("0123456789ABCDEF"[x[i] & 0x0F]);
+//        }
 
         // Clean up resources
         //gcry_md_close(sha256);
+        std::string hashedPass = hashWithSHA256(passwordField);
 
         updatePasswordList(&accountField, &loginField, &hashedPass);
     }
@@ -145,5 +145,38 @@ void PasswordListWindow::updatePasswordList(std::string *account, std::string *l
     list->InsertItem(0, *account);
     list->SetItem(0, 1, *login);
     list->SetItem(0, 2, *pass);
-}
+};
 
+std::string PasswordListWindow::hashWithSHA256(const std::string &input) {
+    // Initialize the libgcrypt library
+    if (!gcry_check_version(GCRYPT_VERSION)) {
+        std::cerr << "Libgcrypt version mismatch" << std::endl;
+        return "";
+    }
+
+    // Initialize the SHA-256 algorithm
+    gcry_md_hd_t sha256;
+    if (gcry_md_open(&sha256, GCRY_MD_SHA256, GCRY_MD_FLAG_SECURE) != 0) {
+        std::cerr << "SHA-256 initialization failed" << std::endl;
+        return "";
+    }
+
+    // Feed the input data to the hash algorithm
+    gcry_md_write(sha256, input.c_str(), input.length());
+
+    // Finalize the hash computation
+    const unsigned char *hashBytes = gcry_md_read(sha256, 0);
+    const size_t hashSize = gcry_md_get_algo_dlen(GCRY_MD_SHA256);
+    
+    // Convert the hash bytes to a hexadecimal string
+    std::string hashResult;
+    for (size_t i = 0; i < hashSize; ++i) {
+        hashResult += char("0123456789ABCDEF"[hashBytes[i] >> 4]);
+        hashResult += char("0123456789ABCDEF"[hashBytes[i] & 0x0F]);
+    }
+
+    // Clean up resources
+    gcry_md_close(sha256);
+
+    return hashResult;
+};
