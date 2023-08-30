@@ -8,8 +8,9 @@
 #include <wx/wx.h>
 #include <iostream>
 #include <fstream>
-#include <bcrypt/BCrypt.hpp>
+//#include <bcrypt/BCrypt.hpp>
 #include "EncryptionManager.cpp"
+
 
 class PasswordManager {
     

@@ -6,7 +6,7 @@
 //
 #include <wx/wx.h>
 #include <list>
-#include <bcrypt/BCrypt.hpp>
+//#include <bcrypt/BCrypt.hpp>
 #pragma once
 
 

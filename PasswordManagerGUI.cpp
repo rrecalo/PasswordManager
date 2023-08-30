@@ -25,6 +25,11 @@ public :
 
 wxIMPLEMENT_APP(MyApp);
 
+wxBEGIN_EVENT_TABLE(MyFrame, wxFrame)
+EVT_BUTTON(2, MyFrame::onSubmitMasterPin)
+EVT_BUTTON(3, MyFrame::onDebugButtonClicked)
+EVT_BUTTON(56, PasswordListWindow::onSubmitNewAccount)
+wxEND_EVENT_TABLE()
 
 
 
