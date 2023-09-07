@@ -14,7 +14,6 @@
 #include "PasswordListWindow.hpp"
 #include <gcrypt.h>
 //#include "PasswordManagerGUI.h"
-#pragma once
 #endif
 
 
@@ -110,35 +109,195 @@ void PasswordListWindow::onSubmitNewAccount(wxCommandEvent &commandEvent){
     std::string loginField = (std::string)loginInputField->GetValue();
     std::string passwordField = (std::string)passwordInputField->GetValue();
     
-    
-    
-    //std::cout << "login field : " << !loginField.empty() << "\n\n";
-    
     if(!loginField.empty() && !passwordField.empty()){
-//        char const *s = passwordField.c_str();
-//        unsigned char *x;
-//        unsigned i;
-//        unsigned int l = gcry_md_get_algo_dlen(GCRY_MD_SHA256); /* get digest length (used later to print the result) */
-//        gcry_md_hd_t h;
-//        gcry_md_open(&h, GCRY_MD_SHA256, GCRY_MD_FLAG_SECURE); /* initialise the hash context */
-//        gcry_md_write(h, s, strlen(s)); /* hash some text */
-//        x = gcry_md_read(h, GCRY_MD_SHA256); /* get the result */
-//
-//        std::string hashedPass;
-//        for (size_t i = 0; i < l; ++i) {
-//            hashedPass += char("0123456789ABCDEF"[x[i] >> 4]);
-//            hashedPass += char("0123456789ABCDEF"[x[i] & 0x0F]);
-//        }
+        
+        std::string input = passwordField;
+        std::string pin = "1234"; // Replace with your 4-digit PIN
 
-        // Clean up resources
-        //gcry_md_close(sha256);
-        std::string hashedPass = hashWithSHA256(passwordField);
+        std::string encrypted = PasswordListWindow::encryptString(input, pin);
+        std::cout << "Encrypted: " << encrypted << std::endl;
 
-        updatePasswordList(&accountField, &loginField, &hashedPass);
+
+        std::string decrypted = PasswordListWindow::decryptString(encrypted, pin);
+
+        if (decrypted.empty()) {
+            std::cerr << "Decryption failed." << std::endl;
+        } else {
+            std::cout << "Decrypted: " << decrypted << std::endl;
+        }
+
     }
     
     
 };
+
+// Function to encrypt a string using AES in CBC mode
+std::string PasswordListWindow::encryptString(const std::string& input, const std::string& pin) {
+    // Initialize the libgcrypt library
+     if (!gcry_check_version(GCRYPT_VERSION)) {
+         std::cerr << "libgcrypt version mismatch" << std::endl;
+         exit(1);
+     }
+
+     gcry_cipher_hd_t handle;
+     gcry_error_t error;
+
+     // Define the encryption algorithm and mode (e.g., AES-256, CBC)
+     const int key_length = 32; // AES-256 key length
+
+     // Initialize the cipher handle
+        
+     error = gcry_cipher_open(&handle, GCRY_CIPHER_AES256, GCRY_CIPHER_MODE_CBC, 0);
+     if (error) {
+         std::cerr << "Failed to initialize cipher: " << gcry_strerror(error) << std::endl;
+         exit(1);
+     }
+
+     // Set the encryption key (PIN)
+     error = gcry_cipher_setkey(handle, pin.c_str(), key_length);
+     if (error) {
+         std::cerr << "Failed to set encryption key: " << gcry_strerror(error) << std::endl;
+         gcry_cipher_close(handle);
+         exit(1);
+     }
+
+     // Get the block length for the IV
+     const size_t block_length = gcry_cipher_get_algo_blklen(GCRY_CIPHER_AES256);
+     if (block_length == 0) {
+         std::cerr << "Failed to get block length" << std::endl;
+         gcry_cipher_close(handle);
+         exit(1);
+     }
+
+     // Generate an IV (Initialization Vector)
+     unsigned char iv[block_length];
+     gcry_create_nonce(iv, block_length);
+     //gcry_randomize(iv, sizeof(iv), GCRY_STRONG_RANDOM);
+
+    /** padding code start*/
+    size_t padding_length = block_length - (input.size() % block_length);
+    std::string padded = input;
+    for (size_t i = 0; i < padding_length; ++i) {
+        padded.push_back(static_cast<char>(padding_length));
+    }
+    /** padding code end*/
+    
+    std::string input2 = padded;
+    // Allocate memory for the encrypted data (make sure it's a multiple of block_length)
+    std::string encrypted(input2.size(), '\0');
+    
+    // Set the IV
+    error = gcry_cipher_setiv(handle, iv, block_length);
+    if (error) {
+        std::cerr << "Failed to set IV: " << gcry_strerror(error) << std::endl;
+        gcry_cipher_close(handle);
+        exit(1);
+    }
+
+    // Encrypt the data
+    error = gcry_cipher_encrypt(handle, reinterpret_cast<unsigned char*>(&encrypted[0]), encrypted.size(), input2.c_str(), input2.size());
+    if (error) {
+        std::cerr << "Failed to encrypt data: " << gcry_strerror(error) << std::endl;
+        gcry_cipher_close(handle);
+        exit(1);
+    }
+
+    // Cleanup and finalize
+    gcry_cipher_close(handle);
+
+    // Encode the IV and encrypted data as a Base64 string
+    std::string result;
+    result += std::string(reinterpret_cast<char*>(iv), block_length);
+    result += encrypted;
+
+    return result;
+ }
+
+std::string PasswordListWindow::decryptString(const std::string& encrypted, const std::string& pin) {
+    // Initialize the libgcrypt library
+    if (!gcry_check_version(GCRYPT_VERSION)) {
+        std::cerr << "libgcrypt version mismatch" << std::endl;
+        exit(1);
+    }
+
+    gcry_cipher_hd_t handle;
+    gcry_error_t error;
+
+    // Define the encryption algorithm and mode (e.g., AES-256, CBC)
+    const int key_length = 32; // AES-256
+
+    // Initialize the cipher handle
+    error = gcry_cipher_open(&handle, GCRY_CIPHER_AES256, GCRY_CIPHER_MODE_CBC, 0);
+    if (error) {
+        std::cerr << "Failed to initialize cipher: " << gcry_strerror(error) << std::endl;
+        exit(1);
+    }
+
+    // Set the encryption key (PIN)
+    error = gcry_cipher_setkey(handle, pin.c_str(), key_length);
+    if (error) {
+        std::cerr << "Failed to set encryption key: " << gcry_strerror(error) << std::endl;
+        gcry_cipher_close(handle);
+        exit(1);
+    }
+
+    // Get the block length for the IV
+    const size_t block_length = gcry_cipher_get_algo_blklen(GCRY_CIPHER_AES256);
+    if (block_length == 0) {
+        std::cerr << "Failed to get block length" << std::endl;
+        gcry_cipher_close(handle);
+        exit(1);
+    }
+
+    if (encrypted.size() <= block_length) {
+        std::cerr << "Invalid encrypted data" << std::endl;
+        gcry_cipher_close(handle);
+        exit(1);
+    }
+
+    // Extract the IV from the encrypted data
+    unsigned char iv[block_length];
+    std::memcpy(iv, encrypted.c_str(), block_length);
+
+    // Allocate memory for the decrypted data
+    std::string decrypted(encrypted.size() - block_length, '\0');
+
+    // Set the IV
+    error = gcry_cipher_setiv(handle, iv, block_length);
+    if (error) {
+        std::cerr << "Failed to set IV: " << gcry_strerror(error) << std::endl;
+        gcry_cipher_close(handle);
+        exit(1);
+    }
+
+    // Decrypt the data
+    error = gcry_cipher_decrypt(handle, reinterpret_cast<unsigned char*>(&decrypted[0]), decrypted.size(), encrypted.c_str() + block_length, encrypted.size() - block_length);
+    if (error) {
+        std::cerr << "Failed to decrypt data: " << gcry_strerror(error) << std::endl;
+        gcry_cipher_close(handle);
+        exit(1);
+    }
+
+    // Cleanup and finalize
+    gcry_cipher_close(handle);
+
+    
+    size_t pad_length = decrypted[decrypted.size() - 1];
+    if (pad_length > decrypted.size()) {
+        // Invalid padding
+        return "";
+    }
+    return decrypted.substr(0, decrypted.size() - pad_length);
+}
+
+std::string pkcs7Unpad(const std::string& input) {
+    size_t pad_length = input[input.size() - 1];
+    if (pad_length > input.size()) {
+        // Invalid padding
+        return "";
+    }
+    return input.substr(0, input.size() - pad_length);
+}
 
 void PasswordListWindow::updatePasswordList(std::string *account, std::string *login, std::string *pass){
     //std::cout << "pass : " << *pass << std::endl;
@@ -147,36 +306,9 @@ void PasswordListWindow::updatePasswordList(std::string *account, std::string *l
     list->SetItem(0, 2, *pass);
 };
 
-std::string PasswordListWindow::hashWithSHA256(const std::string &input) {
-    // Initialize the libgcrypt library
-    if (!gcry_check_version(GCRYPT_VERSION)) {
-        std::cerr << "Libgcrypt version mismatch" << std::endl;
-        return "";
-    }
 
-    // Initialize the SHA-256 algorithm
-    gcry_md_hd_t sha256;
-    if (gcry_md_open(&sha256, GCRY_MD_SHA256, GCRY_MD_FLAG_SECURE) != 0) {
-        std::cerr << "SHA-256 initialization failed" << std::endl;
-        return "";
-    }
 
-    // Feed the input data to the hash algorithm
-    gcry_md_write(sha256, input.c_str(), input.length());
-
-    // Finalize the hash computation
-    const unsigned char *hashBytes = gcry_md_read(sha256, 0);
-    const size_t hashSize = gcry_md_get_algo_dlen(GCRY_MD_SHA256);
-    
-    // Convert the hash bytes to a hexadecimal string
-    std::string hashResult;
-    for (size_t i = 0; i < hashSize; ++i) {
-        hashResult += char("0123456789ABCDEF"[hashBytes[i] >> 4]);
-        hashResult += char("0123456789ABCDEF"[hashBytes[i] & 0x0F]);
-    }
-
-    // Clean up resources
-    gcry_md_close(sha256);
-
-    return hashResult;
-};
+void PasswordListWindow::handleError(const char *message) {
+    std::cerr << "Error: " << message << std::endl;
+    exit(1);
+}

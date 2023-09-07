@@ -22,7 +22,10 @@ public:
     PasswordListWindow(const wxString &title, const wxPoint &pos, const wxSize &size);
     void init();
     void onSubmitNewAccount(wxCommandEvent&);
-    std::string hashWithSHA256(const std::string &input);
+    std::string encryptString(const std::string& plaintext, const std::string& pin);
+    std::string decryptString(const std::string& encrypted, const std::string& pin);
+    void handleError(const char *message);
+    
 private:
     
     void updatePasswordList(std::string* account, std::string* login, std::string* pass);
