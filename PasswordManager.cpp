@@ -8,6 +8,8 @@
 #include <wx/wx.h>
 #include <iostream>
 #include <fstream>
+#include "PasswordListWindow.hpp"
+//#include "Account.cpp"
 //#include <bcrypt/BCrypt.hpp>
 #include "EncryptionManager.cpp"
 
@@ -15,6 +17,53 @@
 class PasswordManager {
     
 public:
+    static bool storePasswordList(std::vector<Account> accList){
+        using namespace std;
+        remove("list.dat");
+        fstream new_file;
+        new_file.open("list.dat", ios::out);
+        if(!new_file){
+            cout << "File creation Failed";
+            new_file.close();
+            return false;
+        }
+        else{
+            for (size_t i = 0; i < accList.size(); ++i) {
+                new_file << accList[i].Serialize() << "\n";
+                //std::cout << accList[i].toString() << " " << std::endl;
+            }
+            
+            new_file.close();
+            return true;
+        }
+        
+        return true;
+    }
+    
+    static std::vector<Account> retrievePasswordList(){
+        using namespace std;
+        vector<Account> accounts;
+            ifstream file("list.dat");
+
+            if (!file.is_open()) {
+                throw runtime_error("Failed to open file for reading.");
+            }
+
+            string line;
+            while (getline(file, line)) {
+                accounts.push_back(Account::Deserialize(line));
+            }
+
+            file.close();
+            return accounts;
+//            for (size_t i = 0; i < accounts.size(); ++i) {
+//                cout << accounts[i].toString() << "\n";
+//
+//                //std::cout << accList[i].toString() << " " << std::endl;
+//            }
+//        return true;
+    }
+    
     static bool storeMasterPassword(wxString encryptedPassword){
         
         using namespace std;
@@ -70,15 +119,6 @@ public:
 
         infile.close();
         
-        //sLine is read in from master.dat in its encrypted form!!!
-        //cout << "existing password :: " << sLine << endl;
-        //password entered is already encrypted!!!23
-        //cout << "password entered :: " << password << endl;
-        
-        
-        //cout << "existing password :: " << EncryptionManager::decrypt(sLine, "mykey") << endl;
-        //is.close();
         return (password == sLine);
-        //BCrypt::validatePassword("password", (std::string)password);
     };
 };
