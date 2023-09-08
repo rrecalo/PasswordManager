@@ -13,6 +13,7 @@
 #include <wx/wx.h>
 #include <wx/listctrl.h>
 #include <wx/splitter.h>
+#include "Account.cpp"
 #endif /* PasswordListWindow_hpp */
 #pragma once
 
@@ -25,9 +26,8 @@ public:
     std::string encryptString(const std::string& plaintext, const std::string& pin);
     std::string decryptString(const std::string& encrypted, const std::string& pin);
     void handleError(const char *message);
-    
 private:
-    
+    void loadList(std::vector<Account> accounts);
     void updatePasswordList(std::string* account, std::string* login, std::string* pass);
     //bool PasswordListWindow::onSubmitNewAccount(wxCommandEvent &commandEvent)
     wxBoxSizer *sizer;

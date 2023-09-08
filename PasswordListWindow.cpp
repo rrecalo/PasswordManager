@@ -12,9 +12,13 @@
 #include <wx/listctrl.h>
 #ifndef WX_PRECOMP
 #include "PasswordListWindow.hpp"
+#include "PasswordManager.cpp"
 #include <gcrypt.h>
 //#include "PasswordManagerGUI.h"
+#pragma once
 #endif
+
+
 
 
 wxBEGIN_EVENT_TABLE(PasswordListWindow, wxFrame)
@@ -30,12 +34,13 @@ void PasswordListWindow::init(){
     list = new wxListView(this, wxID_ANY, wxDefaultPosition, wxSize(680, 300));
     //list->SetSingleStyle(wxRESIZE_BORDER, false);
     //list->SetMaxSize(wxSize(500, 300));
-    list->InsertColumn(0, "Account");
+    list->InsertColumn(0, "Domain");
     list->InsertColumn(1, "Login");
-    list->InsertColumn(2, "Hashed Password");
-    list->InsertItem(0, "google.com");
-    list->SetItem(0, 1, "websitelogin@email.com");
-    list->SetItem(0, 2, "password12");
+    list->InsertColumn(2, "Password");
+    PasswordListWindow::loadList(PasswordManager::retrievePasswordList());
+//    list->InsertItem(0, "google.com");
+//    list->SetItem(0, 1, "websitelogin@email.com");
+//    list->SetItem(0, 2, "password12");
     
     list->SetColumnWidth(0, GetSize().GetWidth() * 0.5);
     list->SetColumnWidth(1, GetSize().GetWidth() * 0.5);
@@ -54,7 +59,7 @@ void PasswordListWindow::init(){
     wxBoxSizer *usernameSizer = new wxBoxSizer(wxVERTICAL);
     wxBoxSizer *passwordSizer = new wxBoxSizer(wxVERTICAL);
     
-    wxStaticText *accountInputLabel = new wxStaticText(this, wxID_ANY, "Account Type", wxDefaultPosition, wxSize(200, 25), wxALL , "");
+    wxStaticText *accountInputLabel = new wxStaticText(this, wxID_ANY, "Account Domain", wxDefaultPosition, wxSize(200, 25), wxALL , "");
     accountInputField = new wxTextCtrl(this, 5, "", wxDefaultPosition, wxSize(200, 25));
     accountInputField->SetHint("What is this login used for...");
     accountInputField->Fit();
@@ -115,17 +120,21 @@ void PasswordListWindow::onSubmitNewAccount(wxCommandEvent &commandEvent){
         std::string pin = "1234"; // Replace with your 4-digit PIN
 
         std::string encrypted = PasswordListWindow::encryptString(input, pin);
-        std::cout << "Encrypted: " << encrypted << std::endl;
+        //std::cout << "Encrypted: " << encrypted.size() << std::endl;
 
 
         std::string decrypted = PasswordListWindow::decryptString(encrypted, pin);
 
         if (decrypted.empty()) {
-            std::cerr << "Decryption failed." << std::endl;
+            //std::cerr << "Decryption failed." << std::endl;
         } else {
-            std::cout << "Decrypted: " << decrypted << std::endl;
+            //std::cout << "Decrypted: " << decrypted << std::endl;
         }
 
+        std::string ps = "********";
+
+        PasswordListWindow::updatePasswordList(&accountField, &loginField, &ps);
+        
     }
     
     
@@ -304,9 +313,29 @@ void PasswordListWindow::updatePasswordList(std::string *account, std::string *l
     list->InsertItem(0, *account);
     list->SetItem(0, 1, *login);
     list->SetItem(0, 2, *pass);
+    std::vector<Account> accounts;
+    
+    for(int i = 0; i < list->GetItemCount(); ++i){
+        Account newAccount(std::string(list->GetItemText(i, 0)), std::string(list->GetItemText(i, 1)), std::string(list->GetItemText(i, 2)));
+        //std::cout << "item : " << newAccount.domain << " | " << newAccount.login << " | " << newAccount.plaintextpass << std::endl;
+        accounts.push_back(newAccount);
+    }
+    PasswordManager::storePasswordList(accounts);
+    
+    //std::cout << "\n :: RETRIEVING SAVED LIST :: \n";
+    //PasswordManager::retrievePasswordList();
 };
 
-
+void PasswordListWindow::loadList(std::vector<Account> accounts){
+    for(size_t i = 0; i < accounts.size(); ++i){
+        list->InsertItem(0, accounts[i].domain);
+        list->SetItem(0, 1, accounts[i].login);
+        list->SetItem(0, 2, accounts[i].plaintextpass);
+    }
+    //list->InsertItem(0, "google.com");
+    //    list->SetItem(0, 1, "websitelogin@email.com");
+    //    list->SetItem(0, 2, "password12");
+}
 
 void PasswordListWindow::handleError(const char *message) {
     std::cerr << "Error: " << message << std::endl;
