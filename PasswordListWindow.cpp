@@ -34,23 +34,10 @@ void PasswordListWindow::init(){
     list = new wxListView(this, wxID_ANY, wxDefaultPosition, wxSize(680, 300));
     //list->SetSingleStyle(wxRESIZE_BORDER, false);
     //list->SetMaxSize(wxSize(500, 300));
-    list->InsertColumn(0, "Domain");
-    list->InsertColumn(1, "Login");
-    list->InsertColumn(2, "Password");
     PasswordListWindow::loadList(PasswordManager::retrievePasswordList());
-//    list->InsertItem(0, "google.com");
-//    list->SetItem(0, 1, "websitelogin@email.com");
-//    list->SetItem(0, 2, "password12");
     
     list->SetColumnWidth(0, GetSize().GetWidth() * 0.5);
     list->SetColumnWidth(1, GetSize().GetWidth() * 0.5);
-    //list->SetBackgroundColour(wxColour(200, 25, 25));
-    
-    //wxBoxSizer *passSizer = new wxBoxSizer(wxVERTICAL);
-    
-    
-
-
     
     
     //wxPanel *inputPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(500, 100));
@@ -317,24 +304,21 @@ void PasswordListWindow::updatePasswordList(std::string *account, std::string *l
     
     for(int i = 0; i < list->GetItemCount(); ++i){
         Account newAccount(std::string(list->GetItemText(i, 0)), std::string(list->GetItemText(i, 1)), std::string(list->GetItemText(i, 2)));
-        //std::cout << "item : " << newAccount.domain << " | " << newAccount.login << " | " << newAccount.plaintextpass << std::endl;
         accounts.push_back(newAccount);
     }
     PasswordManager::storePasswordList(accounts);
     
-    //std::cout << "\n :: RETRIEVING SAVED LIST :: \n";
-    //PasswordManager::retrievePasswordList();
 };
 
 void PasswordListWindow::loadList(std::vector<Account> accounts){
+    list->InsertColumn(0, "Domain");
+    list->InsertColumn(1, "Login");
+    list->InsertColumn(2, "Password");
     for(size_t i = 0; i < accounts.size(); ++i){
         list->InsertItem(0, accounts[i].domain);
         list->SetItem(0, 1, accounts[i].login);
         list->SetItem(0, 2, accounts[i].plaintextpass);
     }
-    //list->InsertItem(0, "google.com");
-    //    list->SetItem(0, 1, "websitelogin@email.com");
-    //    list->SetItem(0, 2, "password12");
 }
 
 void PasswordListWindow::handleError(const char *message) {

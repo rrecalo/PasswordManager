@@ -22,8 +22,6 @@ public:
 
         
         std::string encryptedPass = encrypt((string)password, "mykey");
-        //std::cout << "Encrypted: " << encryptedPass;
-        //std::cout << "\nDecrypted: " << decrypt(encryptedPass, "mykey");
         
         return std::string(encryptedPass);
     }

@@ -29,7 +29,8 @@ public:
 private:
     void loadList(std::vector<Account> accounts);
     void updatePasswordList(std::string* account, std::string* login, std::string* pass);
-    //bool PasswordListWindow::onSubmitNewAccount(wxCommandEvent &commandEvent)
+    
+    
     wxBoxSizer *sizer;
     wxListView *list;
     wxButton *submit;
@@ -39,7 +40,3 @@ private:
     wxTextCtrl *passwordInputField;
     wxDECLARE_EVENT_TABLE();
 };
-////
-//wxBEGIN_EVENT_TABLE(PasswordListWindow, wxFrame)
-//    EVT_BUTTON(56, PasswordListWindow::onSubmitNewAccount)
-//wxEND_EVENT_TABLE()

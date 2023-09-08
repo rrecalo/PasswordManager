@@ -56,12 +56,6 @@ public:
 
             file.close();
             return accounts;
-//            for (size_t i = 0; i < accounts.size(); ++i) {
-//                cout << accounts[i].toString() << "\n";
-//
-//                //std::cout << accList[i].toString() << " " << std::endl;
-//            }
-//        return true;
     }
     
     static bool storeMasterPassword(wxString encryptedPassword){
